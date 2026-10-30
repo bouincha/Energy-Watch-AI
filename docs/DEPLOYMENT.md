@@ -50,6 +50,33 @@ environment variables above → Create.
 > **Free plan note:** the service sleeps after 15 minutes of inactivity, and the first request
 > after that takes about 30-60 s. Open the URL a minute before your demo.
 
+## 3 bis. Hugging Face Spaces (free, no credit card)
+
+Render asks for a credit card to verify your identity, even on the free plan. Hugging Face
+Spaces runs the same Docker image for free and only needs an account.
+
+**One-time setup (≈ 5 minutes):**
+1. Create a free account at https://huggingface.co/join.
+2. Create a Space at https://huggingface.co/new-space:
+   - Space name: `energywatch-ai`
+   - SDK: **Docker** → *Blank* template
+   - Hardware: **CPU basic · Free**
+   - Visibility: Public
+3. Create a token at https://huggingface.co/settings/tokens → *Create new token* → type **Write**.
+   Copy it.
+4. In the Space → **Settings → Variables and secrets**, add the secrets `GROQ_API_KEY` (optional)
+   and `ADMIN_API_KEY` (any password you choose).
+5. In the GitHub repo → **Settings → Secrets and variables → Actions**:
+   - **Secrets** tab → *New repository secret*: `HF_TOKEN` = the token from step 3
+   - **Variables** tab → *New repository variable*: `HF_SPACE` = `<your-hf-username>/energywatch-ai`
+6. Re-run the latest workflow (Actions → CI/CD → *Re-run all jobs*), or push any commit.
+
+From then on, every push to `main` that passes the tests is deployed automatically by the
+`deploy-huggingface` job. The app is available at
+`https://<your-hf-username>-energywatch-ai.hf.space`.
+
+> Free Spaces sleep after 48 h without visits; the first visit wakes them up (≈ 1 min).
+
 ## 4. CI/CD with GitHub Actions
 
 `.github/workflows/ci.yml` runs on every push and pull request:
@@ -59,6 +86,7 @@ environment variables above → Create.
 | `test` | ruff lint → pytest with coverage (fails under 85 %) → evaluation benchmark → upload reports |
 | `docker` | build the image → run the container → `scripts/smoke_test.py` → print logs |
 | `deploy` (push to `main` only) | trigger the Render deploy hook → post-deploy smoke test against the live URL |
+| `deploy-huggingface` (push to `main` only) | push the app to the Hugging Face Space → post-deploy smoke test |
 
 Optional configuration (repo → Settings → Secrets and variables → Actions):
 
@@ -66,8 +94,10 @@ Optional configuration (repo → Settings → Secrets and variables → Actions)
 |---|---|---|
 | `RENDER_DEPLOY_HOOK_URL` | Secret | Render → service → Settings → *Deploy Hook* URL |
 | `RENDER_SERVICE_URL` | Variable | `https://energywatch-ai-xxxx.onrender.com` |
+| `HF_TOKEN` | Secret | Hugging Face token with **Write** access |
+| `HF_SPACE` | Variable | `<hf-username>/energywatch-ai` |
 
-Without them, the deploy job is skipped with a notice, and Render's own *auto-deploy on push*
+Without them, the deploy jobs are skipped with a notice, and Render's own *auto-deploy on push*
 still works. If you use the deploy hook, turn auto-deploy off in Render so each commit deploys
 only once, after CI passes.
 

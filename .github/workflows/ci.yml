@@ -100,3 +100,37 @@ jobs:
           fi
           sleep 90
           python scripts/smoke_test.py "$RENDER_SERVICE_URL"
+
+  deploy-huggingface:
+    name: Deploy to Hugging Face Spaces
+    needs: docker
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Push the app to the Space
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          HF_SPACE: ${{ vars.HF_SPACE }}   # e.g. bouincha/energywatch-ai
+        run: |
+          if [ -z "$HF_TOKEN" ] || [ -z "$HF_SPACE" ]; then
+            echo "::notice::HF_TOKEN secret / HF_SPACE variable not set - skipping Hugging Face deploy"
+            exit 0
+          fi
+          # Spaces reject binary files without LFS: screenshots are only needed on GitHub.
+          rm -rf .git docs/screenshots
+          { printf -- '---\ntitle: EnergyWatch AI\nemoji: ⚡\ncolorFrom: green\ncolorTo: blue\nsdk: docker\napp_port: 8000\npinned: false\n---\n\n'; cat README.md; } > README.tmp
+          mv README.tmp README.md
+          git init -q -b main
+          git add -A
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Deploy ${GITHUB_SHA::7}"
+          git push --force "https://user:${HF_TOKEN}@huggingface.co/spaces/${HF_SPACE}" main
+          echo "SPACE_URL=https://${HF_SPACE/\//-}.hf.space" | tr '[:upper:]' '[:lower:]' | sed 's/^space_url/SPACE_URL/' >> "$GITHUB_ENV"
+
+      - name: Post-deployment smoke test
+        if: env.SPACE_URL != ''
+        continue-on-error: true   # the Space may still be building; check the Quality page if this times out
+        run: |
+          sleep 180
+          python scripts/smoke_test.py "$SPACE_URL"

@@ -12,7 +12,7 @@ and monitors itself in production.
 ![LangGraph](https://img.shields.io/badge/LangGraph-1.2-1c3c3c)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.162-009688)
 ![Docker](https://img.shields.io/badge/docker-ready-2496ED)
-![Render](https://img.shields.io/badge/deploy-Render-46E3B7)
+![Deploy](https://img.shields.io/badge/deploy-HF%20Spaces%20%7C%20Render-46E3B7)
 
 ![Dashboard overview](docs/screenshots/overview.png)
 
@@ -222,9 +222,14 @@ behaves as designed. They are not an independent benchmark. See
 [docs/EVALUATION.md](docs/EVALUATION.md).
 
 **GitHub Actions pipeline** (`.github/workflows/ci.yml`):
-`lint → tests + coverage gate (85 %) → evaluation → docker build → container smoke test → deploy to Render → post-deploy smoke test`
+`lint → tests + coverage gate (85 %) → evaluation → docker build → container smoke test → deploy (Hugging Face Spaces / Render) → post-deploy smoke test`
 
-## ☁️ Deployment on Render
+## ☁️ Deployment
+
+**Free, no credit card: Hugging Face Spaces.** Create a Docker Space, then add the `HF_TOKEN`
+secret and the `HF_SPACE` variable to the GitHub repo. CI deploys every green push to `main`.
+
+**Render** (asks for a card to verify your identity, even on the free plan):
 
 1. Push this repo to GitHub.
 2. Render → **New → Blueprint** → select the repo (it reads `render.yaml`).
