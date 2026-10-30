@@ -3,6 +3,19 @@
 All notable changes to EnergyWatch AI. Versions follow [Semantic Versioning](https://semver.org).
 System version, agent-card versions and prompt version are bumped together.
 
+## [1.2.0] - 2026-10-30
+
+### Changed
+- Dashboard redesigned for non-experts: light theme by default, plain-language navigation
+  (Home, Ask the AI, Problems found, Approvals), a Home page that explains the situation in one
+  sentence with an energy health score, problems described as "what happened / what to do",
+  and an explanation box on technical pages.
+
+### Added
+- "What is this page?" help panel on every page and a welcome guide on the first visit.
+- `start-online.bat`: one double-click to run the app and publish it with Cloudflare Tunnel.
+- `start-local.bat` and `docs/GO_ONLINE.md`.
+
 ## [1.1.0] - 2026-10-30
 
 ### Added

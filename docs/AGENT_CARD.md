@@ -11,7 +11,7 @@
 | Field | Value |
 |---|---|
 | Name | EnergyWatch AI |
-| Version | 1.1.0 (alpha, production pilot) |
+| Version | 1.2.0 (alpha, production pilot) |
 | Last updated | 2026-10-30 |
 | Sector | Energy |
 | Architecture | LangGraph supervisor pattern: guardrails → supervisor → specialists → report_writer → monitor |
@@ -45,7 +45,7 @@
 
 ## Agent cards
 
-### 1. Guardrails Agent (`guardrails`) · v1.1.0 · deterministic
+### 1. Guardrails Agent (`guardrails`) · v1.2.0 · deterministic
 - **Role:** security gate.
 - **Does:** checks every question for prompt-injection patterns, length (≤ 1,000 characters),
   hidden control characters, and topic (energy only).
@@ -55,7 +55,7 @@
 - **Limitations:** regex-based, so it doesn't catch semantically disguised injections.
 - **Metrics:** `energywatch_guardrail_blocks_total{category}`.
 
-### 2. Supervisor / Planner Agent (`supervisor`) · v1.1.0 · LLM
+### 2. Supervisor / Planner Agent (`supervisor`) · v1.2.0 · LLM
 - **Role:** routing and planning.
 - **Does:** classifies the intent (consumption, anomaly, advice, report), detects the site and time
   window, and plans the specialists, using **structured output** validated by Pydantic
@@ -65,20 +65,20 @@
 - **Human oversight:** the plan and reasoning are shown with every answer.
 - **Limitations:** one site per question.
 
-### 3. Consumption Analyst Agent (`consumption_analyst`) · v1.1.0 · LLM
+### 3. Consumption Analyst Agent (`consumption_analyst`) · v1.2.0 · LLM
 - **Role:** data analysis with **tool calling**.
 - **Tools:** `get_consumption_summary`, `compare_periods`, `get_top_consumers`, `get_data_center_pue` (read-only, validated arguments).
 - **Fallback:** rule-based tool selection and a template narrative. Tool errors trigger RB-004.
 - **Limitations:** hourly granularity; 30 days of history.
 
-### 4. Anomaly Detector Agent (`anomaly_detector`) · v1.1.0 · LLM for the explanation only
+### 4. Anomaly Detector Agent (`anomaly_detector`) · v1.2.0 · LLM for the explanation only
 - **Role:** detection and explanation.
 - **Tools:** `detect_anomalies` (robust z-score vs. a per-hour, per-day-type baseline).
 - **Output:** events with pattern, duration, excess kWh, cost and severity, plus likely root causes.
 - **Quality:** precision 1.00 / recall 1.00 on injected ground truth (see EVALUATION.md).
 - **Limitations:** the baseline must be re-learned after structural changes on a site.
 
-### 5. Energy Advisor Agent (`energy_advisor`) · v1.1.0 · LLM + RAG
+### 5. Energy Advisor Agent (`energy_advisor`) · v1.2.0 · LLM + RAG
 - **Role:** grounded recommendations and action proposals.
 - **Tools:** `knowledge_base.search` (BM25), `detect_anomalies`, `actions.propose`.
 - **Permissions:** may **propose** actions, never execute them.
@@ -86,13 +86,13 @@
 - **Human oversight:** Approve or Reject on the Actions page or directly in the chat. Every decision is audited.
 - **Limitations:** 7 curated documents; savings are estimates.
 
-### 6. Report Writer Agent (`report_writer`) · v1.1.0 · LLM
+### 6. Report Writer Agent (`report_writer`) · v1.2.0 · LLM
 - **Role:** final answer synthesis.
 - **Does:** combines the specialists' outputs into Markdown and keeps every number and citation.
   It flags degraded mode and applies the output guardrail (credential redaction).
 - **Fallback:** template report built from the specialists' sections.
 
-### 7. Monitoring Agent (`monitor`) · v1.1.0 · deterministic
+### 7. Monitoring Agent (`monitor`) · v1.2.0 · deterministic
 - **Role:** observability, SLOs and incident detection.
 - **Does:** wraps every agent to record spans linked to the correlation ID, evaluates each run
   against the SLOs, updates the Prometheus metrics, and opens or resolves incidents

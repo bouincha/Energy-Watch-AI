@@ -50,10 +50,14 @@ environment variables above → Create.
 > **Free plan note:** the service sleeps after 15 minutes of inactivity, and the first request
 > after that takes about 30-60 s. Open the URL a minute before your demo.
 
-## 3 bis. Hugging Face Spaces (free, no credit card)
+## 3 bis. Cloudflare Tunnel from your PC (free, no account, no card)
 
-Render asks for a credit card to verify your identity, even on the free plan. Hugging Face
-Spaces runs the same Docker image for free and only needs an account.
+See [GO_ONLINE.md](GO_ONLINE.md): double-click `start-online.bat` to get a public
+`https://….trycloudflare.com` link to the app running on your PC.
+
+## 3 ter. Hugging Face Spaces
+
+Docker Spaces may require a paid Hugging Face plan. If your account allows them:
 
 **One-time setup (≈ 5 minutes):**
 1. Create a free account at https://huggingface.co/join.

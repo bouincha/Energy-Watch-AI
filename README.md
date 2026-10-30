@@ -70,8 +70,9 @@ worth **≈ 24,000 MAD** of avoidable cost, which the system has to find, explai
   JSON logs, agent spans, metrics, incidents and audit entries.
 - 🚨 **Incident management**: a circuit breaker, a degraded mode, 4 runbooks, and incidents that
   open and resolve automatically, with an MTTR for each.
-- 🖥️ **A real dashboard** with seven pages: Overview, AI Assistant, Anomalies, Actions, Monitoring,
-  Quality and Governance.
+- 🖥️ **A dashboard written for people, not engineers**: Home (one-sentence summary and an
+  energy health score), Ask the AI, Problems found (each with "what to do"), Approvals, Monitoring,
+  Quality and Governance. A **"What is this page?"** button explains every page in plain words.
 - ✅ **Quality page**: shows in one place whether everything is valid. It displays the latest
   GitHub Actions run (every job and step), runs the evaluation quality gates live, and runs
   self-checks on the instance itself.
@@ -226,8 +227,12 @@ behaves as designed. They are not an independent benchmark. See
 
 ## ☁️ Deployment
 
-**Free, no credit card: Hugging Face Spaces.** Create a Docker Space, then add the `HF_TOKEN`
-secret and the `HF_SPACE` variable to the GitHub repo. CI deploys every green push to `main`.
+**Free, no account, no card: Cloudflare Tunnel (Windows).** Double-click `start-online.bat`. It
+installs everything on the first run, starts the app and prints a public
+`https://….trycloudflare.com` link. Step by step: [docs/GO_ONLINE.md](docs/GO_ONLINE.md).
+
+**Hugging Face Spaces.** Create a Docker Space (Docker Spaces may need a paid plan), then add the
+`HF_TOKEN` secret and the `HF_SPACE` variable to the GitHub repo. CI deploys every green push to `main`.
 
 **Render** (asks for a card to verify your identity, even on the free plan):
 
@@ -266,6 +271,7 @@ Dockerfile · docker-compose.yml · render.yaml · .github/workflows/ci.yml
 | [AGENT_CARD.md](docs/AGENT_CARD.md) | Governance: system card and one card per agent |
 | [RUNBOOK.md](docs/RUNBOOK.md) | Incident procedures RB-001 to RB-004 |
 | [INCIDENT_REPORT_INC-0001.md](docs/INCIDENT_REPORT_INC-0001.md) | Post-mortem of the LLM outage drill |
+| [GO_ONLINE.md](docs/GO_ONLINE.md) | Put the app online from your PC with Cloudflare Tunnel |
 | [DEPLOYMENT.md](docs/DEPLOYMENT.md) | Docker, Render, CI/CD secrets |
 | [EVALUATION.md](docs/EVALUATION.md) | Benchmark method and results |
 | [COURSE_MAPPING.md](docs/COURSE_MAPPING.md) | Course weeks S1-S5 → implementation |
