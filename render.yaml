@@ -1,0 +1,21 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: energywatch-ai
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LLM_PROVIDER
+        value: auto
+      - key: GROQ_API_KEY
+        sync: false   # set the secret in the Render dashboard
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ADMIN_API_KEY
+        generateValue: true

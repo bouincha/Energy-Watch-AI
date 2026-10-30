@@ -1,0 +1,102 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint, tests & evaluation
+    runs-on: ubuntu-latest
+    env:
+      LLM_PROVIDER: mock   # tests never call a paid LLM
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Lint (ruff)
+        run: ruff check app tests scripts
+
+      - name: Tests with coverage
+        run: pytest --cov=app --cov-report=term --cov-report=xml --cov-fail-under=85 --junitxml=reports/junit.xml
+
+      - name: Evaluation benchmark
+        run: python -m app.evaluation.run_eval --json reports/eval.json
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            reports/
+            coverage.xml
+
+  docker:
+    name: Docker build & smoke test
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build image
+        run: docker build -t energywatch-ai:${{ github.sha }} .
+
+      - name: Run container
+        run: |
+          docker run -d --name ewa -p 8000:8000 energywatch-ai:${{ github.sha }}
+          for i in $(seq 1 30); do curl -sf localhost:8000/health && break; sleep 1; done
+
+      - name: Smoke test
+        run: python scripts/smoke_test.py http://localhost:8000
+
+      - name: Container logs (correlation IDs)
+        if: always()
+        run: docker logs ewa | tail -n 40
+
+  deploy:
+    name: Deploy to Render
+    needs: docker
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger Render deploy hook
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "::notice::RENDER_DEPLOY_HOOK_URL secret not set - skipping (Render auto-deploy can be used instead)"
+            exit 0
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+
+      - name: Post-deployment smoke test
+        env:
+          RENDER_SERVICE_URL: ${{ vars.RENDER_SERVICE_URL }}
+        run: |
+          if [ -z "$RENDER_SERVICE_URL" ]; then
+            echo "::notice::RENDER_SERVICE_URL variable not set - skipping"
+            exit 0
+          fi
+          sleep 90
+          python scripts/smoke_test.py "$RENDER_SERVICE_URL"

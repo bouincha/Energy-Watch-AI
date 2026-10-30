@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EnergyWatch AI</title>
+  <meta name="description" content="Multi-agent energy monitoring platform - consumption, anomalies, recommendations, observability.">
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script>
+    try { const t = localStorage.getItem("ewa-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#/overview">
+      <span class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2ee6a8"/><stop offset="1" stop-color="#18a0fb"/></linearGradient></defs><rect width="32" height="32" rx="9" fill="url(#lg)"/><path d="M18.5 5 9 18h6l-1.5 9L23 14h-6z" fill="#06121f"/></svg>
+      </span>
+      <span class="brand-text"><strong>EnergyWatch</strong><em>AI</em></span>
+    </a>
+    <nav class="nav">
+      <div class="nav-label">Operations</div>
+      <a href="#/overview" data-page="overview"><svg viewBox="0 0 24 24"><path d="M3 13h8V3H3zm0 8h8v-6H3zm10 0h8V11h-8zm0-18v6h8V3z"/></svg>Overview</a>
+      <a href="#/assistant" data-page="assistant"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7v1.6l1.7 2.9a1 1 0 0 1-.9 1.5H19v2a3 3 0 0 1-3 3h-1v3H7v-4.6A8 8 0 0 1 5 9a7 7 0 0 1 7-7zm-1 5v2H9v2h2v2h2v-2h2V9h-2V7z"/></svg>AI Assistant</a>
+      <a href="#/anomalies" data-page="anomalies"><svg viewBox="0 0 24 24"><path d="M1 21h22L12 2zm12-3h-2v-2h2zm0-4h-2v-4h2z"/></svg>Anomalies<span class="nav-badge" id="badge-anomalies"></span></a>
+      <a href="#/actions" data-page="actions"><svg viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>Actions<span class="nav-badge warn" id="badge-actions"></span></a>
+      <div class="nav-label">Platform</div>
+      <a href="#/monitoring" data-page="monitoring"><svg viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>Monitoring<span class="nav-badge danger" id="badge-incidents"></span></a>
+      <a href="#/governance" data-page="governance"><svg viewBox="0 0 24 24"><path d="M12 1 3 5v6c0 5.5 3.8 10.7 9 12 5.2-1.3 9-6.5 9-12V5zm-2 16-4-4 1.4-1.4 2.6 2.6 6.6-6.6L18 9z"/></svg>Governance</a>
+    </nav>
+    <div class="sidebar-foot">
+      <div class="llm-status" id="llm-status" title="LLM provider and circuit breaker">
+        <span class="dot"></span><span class="txt">LLM: …</span>
+      </div>
+      <a class="api-link" href="/docs" target="_blank" rel="noopener">API docs ↗</a>
+      <div class="version" id="app-version"></div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" aria-label="Menu"><svg viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg></button>
+      <div class="page-head">
+        <h1 id="page-title">Overview</h1>
+        <p id="page-sub">Real-time energy performance across all sites</p>
+      </div>
+      <div class="topbar-right">
+        <label class="select-wrap" title="Site filter">
+          <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.3 7 13 7 13s7-7.7 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>
+          <select id="site-select" aria-label="Site"><option value="">All sites</option></select>
+        </label>
+        <div class="clock" id="clock"></div>
+        <button class="icon-btn" id="settings-btn" aria-label="Settings" title="Settings"><svg viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.4 7.4 0 0 0-1.7-1L15 3h-4l-.4 2.7a7.4 7.4 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1a7.4 7.4 0 0 0 1.7 1L11 21h4l.4-2.7a7.4 7.4 0 0 0 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg></button>
+        <button class="icon-btn" id="theme-btn" aria-label="Toggle theme" title="Toggle theme"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9c0-.5 0-1-.1-1.4A5.5 5.5 0 0 1 13.4 3.1 9 9 0 0 0 12 3z"/></svg></button>
+      </div>
+    </header>
+    <main id="view" class="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head"><h3 id="drawer-title"></h3><button class="icon-btn" id="drawer-close" aria-label="Close">✕</button></div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="/static/vendor/chart.umd.min.js"></script>
+<script src="/static/js/app.js"></script>
+</body>
+</html>
