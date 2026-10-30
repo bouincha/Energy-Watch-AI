@@ -8,11 +8,13 @@ os.environ.update({
     "RATE_LIMIT_PER_MINUTE": "10000",
     "LOG_LEVEL": "WARNING",
     "ADMIN_API_KEY": "",
+    "GITHUB_REPO": "",  # never call the GitHub API from tests
 })
 
 import pytest  # noqa: E402
 from fastapi.testclient import TestClient  # noqa: E402
 
+from app.api.quality import clear_cache  # noqa: E402
 from app.api.routes import rate_limiter  # noqa: E402
 from app.config import get_settings  # noqa: E402
 from app.core.actions import actions  # noqa: E402
@@ -32,6 +34,7 @@ def clean_state():
     metrics.reset()
     chaos.reset()
     rate_limiter.reset()
+    clear_cache()
     gw = reset_gateway()
     gw.breaker.reset_after_s = 0.3  # fast recovery for incident tests
     yield

@@ -10,7 +10,7 @@ RUN pip install -r requirements.txt
 FROM python:3.12-slim
 LABEL org.opencontainers.image.title="EnergyWatch AI" \
       org.opencontainers.image.description="Multi-agent energy monitoring platform (LangGraph)" \
-      org.opencontainers.image.version="1.0.0"
+      org.opencontainers.image.version="1.1.0"
 ENV PATH="/opt/venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \

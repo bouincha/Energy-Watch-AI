@@ -211,6 +211,7 @@
     anomalies: { title: "Anomalies", sub: "Statistical detection against a per-hour baseline", render: renderAnomalies },
     actions: { title: "Actions", sub: "Human-in-the-loop approvals and audit trail", render: renderActions },
     monitoring: { title: "Monitoring", sub: "Observability, SLOs, incidents and game days", render: renderMonitoring },
+    quality: { title: "Quality", sub: "Is everything valid? CI tests, evaluation gates and live self-checks", render: renderQuality },
     governance: { title: "Governance", sub: "Agent cards, architecture and runbooks", render: renderGovernance },
   };
 
@@ -898,6 +899,94 @@
       ${(h.errors || []).length ? `<div class="section-title">Errors</div><ul class="list small">${h.errors.map((e) => `<li>${esc(e)}</li>`).join("")}</ul>` : ""}
       <div class="section-title">Answer preview</div><p class="small" style="color:var(--text-2)">${esc((r.answer_preview || "–").replace(/[*#>`]+/g, "").replace(/\s+/g, " "))}…</p>
       <div class="section-title">Find the logs</div><pre class="small mono" style="white-space:pre-wrap;background:var(--code-bg);padding:12px;border-radius:10px;border:1px solid var(--border)">docker logs energywatch | grep ${esc(r.correlation_id)}</pre>`);
+  }
+
+  // ======================================================================== QUALITY
+  const passIcon = (ok, warn = false) => ok
+    ? '<span class="q-ico ok">✓</span>'
+    : warn ? '<span class="q-ico warn">!</span>' : '<span class="q-ico bad">✕</span>';
+  const ciIcon = (conclusion, status) => {
+    if (status && status !== "completed") return '<span class="q-ico run">●</span>';
+    if (conclusion === "success") return passIcon(true);
+    if (conclusion === "skipped" || conclusion === "neutral") return '<span class="q-ico skip">–</span>';
+    return passIcon(false);
+  };
+  const dur = (a, b) => (a && b) ? `${Math.max(0, Math.round((new Date(b) - new Date(a)) / 1000))} s` : "";
+
+  async function renderQuality(view, refresh = false) {
+    view.innerHTML = `<div class="card"><div class="skeleton" style="height:90px"></div></div>
+      <div class="grid cols-2 mt"><div class="card"><div class="skeleton" style="height:300px"></div></div><div class="card"><div class="skeleton" style="height:300px"></div></div></div>`;
+    const q = await api(`/api/quality${refresh ? "?refresh=true" : ""}`);
+    const ci = q.ci;
+    const ev = q.evaluation;
+    const checks = q.self_checks;
+    const ov = { passing: ["ok", "All checks passing", "Tests, evaluation gates and live self-checks are all green."],
+      warning: ["warn", "Passing with warnings", "Blocking checks pass - see the warnings below."],
+      failing: ["bad", "Something is failing", "At least one blocking check failed - see the red items below."] }[q.overall];
+    const checksOk = checks.filter((c) => c.passed).length;
+    const gatesOk = ev.gates.filter((g) => g.passed).length;
+    const jobsOk = ci.available ? ci.jobs.filter((j) => j.conclusion === "success").length : 0;
+
+    view.innerHTML = `
+      <div class="card q-hero ${ov[0]}">
+        <div class="q-big">${ov[0] === "ok" ? "✓" : ov[0] === "warn" ? "!" : "✕"}</div>
+        <div><h2>${ov[1]}</h2><div class="muted">${ov[2]}</div>
+          <div class="row small muted" style="margin-top:8px">
+            <span>v${esc(q.version)}</span>${q.deployed_commit ? `<span>· deployed commit <span class="tag">${esc(q.deployed_commit)}</span></span>` : ""}
+            <span>· checked ${dt(q.generated_at, { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span></div></div>
+        <span class="spacer"></span>
+        <button class="btn" id="q-refresh">↻ Re-run all checks</button>
+      </div>
+
+      <div class="grid cols-3 mt">
+        ${kpi({ label: "CI pipeline (GitHub Actions)", value: ci.available ? `${jobsOk}/${ci.jobs.length}` : "–", unit: ci.available ? "jobs passed" : "",
+          foot: ci.available ? `${badge(ci.conclusion === "success" ? "ok" : ci.status !== "completed" ? "running" : "error", ci.status !== "completed" ? "running" : ci.conclusion)} commit <span class="tag">${esc(ci.commit)}</span>` : esc(ci.reason),
+          glyph: ci.available && ci.conclusion === "success" ? "g-accent" : "g-warn", icon: ICON.check })}
+        ${kpi({ label: "Evaluation quality gates", value: `${gatesOk}/${ev.gates.length}`, unit: "gates passed",
+          foot: `run live on this server in ${nf(ev.duration_ms)} ms`, glyph: ev.passed ? "g-accent" : "g-danger", icon: ICON.peak })}
+        ${kpi({ label: "Runtime self-checks", value: `${checksOk}/${checks.length}`, unit: "checks passed",
+          foot: "graph, governance, data, RAG, guardrails, LLM, incidents", glyph: checksOk === checks.length ? "g-accent" : "g-warn", icon: ICON.shield })}
+      </div>
+
+      <div class="grid cols-2 mt">
+        <div class="card">
+          <div class="card-head"><div><h3>Automated tests · CI/CD</h3><div class="sub">${ci.available ? `Latest run on <strong>main</strong> · ${esc(ci.commit_message)}` : "GitHub Actions"}</div></div>
+            ${ci.available ? `<a class="btn sm" href="${esc(ci.url)}" target="_blank" rel="noopener">Open on GitHub ↗</a>` : ""}</div>
+          ${ci.available ? `
+            <div class="small muted" style="margin-bottom:12px">${esc(ci.workflow)} · ${esc(ci.event)} · started ${dt(ci.started_at)} (${ago(ci.started_at)})</div>
+            <div class="q-jobs">${ci.jobs.map((j) => `
+              <div class="q-job">
+                <div class="row">${ciIcon(j.conclusion, j.status)}<strong>${esc(j.name)}</strong><span class="spacer"></span>
+                  <span class="small muted">${dur(j.started_at, j.completed_at)}</span>
+                  <a class="small" href="${esc(j.url)}" target="_blank" rel="noopener">logs ↗</a></div>
+                <div class="q-steps">${j.steps.map((st) => `<div class="q-step">${ciIcon(st.conclusion, st.conclusion ? "completed" : "in_progress")}<span>${esc(st.name)}</span></div>`).join("")}</div>
+              </div>`).join("")}</div>
+            <p class="small muted" style="margin:12px 0 0">The test job runs <strong>ruff</strong>, the <strong>70 pytest tests</strong> with an 85 % coverage gate, and the evaluation benchmark. The Docker job builds the image and smoke-tests the running container.</p>`
+          : empty(`CI status unavailable: ${esc(ci.reason)}`, ICON.alert)}
+        </div>
+
+        <div class="card">
+          <div class="card-head"><div><h3>Evaluation quality gates</h3><div class="sub">Benchmark executed live · same thresholds as the CI test suite</div></div>${badge(ev.passed ? "ok" : "error", ev.passed ? "all gates passed" : "gate failed")}</div>
+          <div class="q-gates">${ev.gates.map((g) => `
+            <div class="q-gate">
+              <div class="row">${passIcon(g.passed)}<span>${esc(g.name)}</span><span class="spacer"></span>
+                <strong>${nf(g.value * 100, 0)}%</strong><span class="small muted">≥ ${nf(g.threshold * 100, 0)}%</span></div>
+              <div class="bar q-bar"><span style="width:${Math.min(100, g.value * 100)}%;background:${g.passed ? "var(--ok)" : "var(--danger)"}"></span><i style="left:${g.threshold * 100}%"></i></div>
+            </div>`).join("")}</div>
+          <p class="small muted" style="margin:12px 0 0">${ev.details.routing_cases} routing questions · ${ev.details.retrieval_cases} retrieval questions · ${ev.details.guardrail_cases} guardrail prompts ·
+            anomaly detection on ${ev.details.anomaly_seeds.length} datasets (${ev.details.true_positives} found, ${ev.details.false_positives} false positives, ${ev.details.false_negatives} missed).</p>
+        </div>
+      </div>
+
+      <div class="card mt">
+        <div class="card-head"><div><h3>Live self-checks</h3><div class="sub">Executed on this running instance every time the page loads</div></div></div>
+        <div class="q-checks">${checks.map((c) => `
+          <div class="q-check ${c.passed ? "" : c.level === "warning" ? "warn" : "bad"}">${passIcon(c.passed, c.level === "warning")}
+            <div><strong>${esc(c.name)}</strong><div class="small muted">${esc(c.detail)}</div></div>
+            ${c.passed ? "" : `<span class="spacer"></span>${badge(c.level === "warning" ? "warn" : "error", c.level === "warning" ? "warning" : "blocking")}`}</div>`).join("")}</div>
+      </div>`;
+    $("#q-refresh").onclick = () => renderQuality(view, true).catch((e) => toast(esc(e.message), "error"));
+    $("#badge-quality").textContent = q.overall === "passing" ? "" : q.overall === "warning" ? "!" : "✕";
   }
 
   // ======================================================================== GOVERNANCE

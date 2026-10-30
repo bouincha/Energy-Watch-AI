@@ -361,6 +361,37 @@ input[type="range"] { accent-color: var(--warn); width: 140px; }
 .list { margin: 0; padding-left: 18px; color: var(--text-2); }
 .list li { margin: 4px 0; }
 
+/* ------------------------------------------------------------------ quality */
+.q-hero { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.q-hero h2 { font-size: 20px; }
+.q-hero.ok { border-color: color-mix(in srgb, var(--ok) 50%, transparent); background: linear-gradient(90deg, var(--accent-soft), var(--panel) 60%); }
+.q-hero.warn { border-color: color-mix(in srgb, var(--warn) 50%, transparent); background: linear-gradient(90deg, var(--warn-soft), var(--panel) 60%); }
+.q-hero.bad { border-color: color-mix(in srgb, var(--danger) 55%, transparent); background: linear-gradient(90deg, var(--danger-soft), var(--panel) 60%); }
+.q-big { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font-size: 28px; font-weight: 800; flex-shrink: 0; }
+.q-hero.ok .q-big { background: var(--ok); color: #04121c; }
+.q-hero.warn .q-big { background: var(--warn); color: #1a1200; }
+.q-hero.bad .q-big { background: var(--danger); color: #fff; }
+.q-ico { width: 20px; height: 20px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.q-ico.ok { background: var(--accent-soft); color: var(--ok); }
+.q-ico.bad { background: var(--danger-soft); color: var(--danger); }
+.q-ico.warn { background: var(--warn-soft); color: var(--warn); }
+.q-ico.skip { background: var(--panel-2); color: var(--muted); }
+.q-ico.run { background: var(--info-soft); color: var(--info); animation: pulse 1.2s infinite; }
+.q-jobs { display: flex; flex-direction: column; gap: 10px; }
+.q-job { border: 1px solid var(--border); background: var(--panel-2); border-radius: 12px; padding: 12px 14px; }
+.q-steps { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 0 6px; padding-left: 14px; border-left: 2px solid var(--border-strong); }
+.q-step { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--text-2); }
+.q-step .q-ico { width: 16px; height: 16px; font-size: 9px; }
+.q-gates { display: flex; flex-direction: column; gap: 14px; }
+.q-gate .row { flex-wrap: nowrap; font-size: 13px; }
+.q-bar { position: relative; margin-top: 7px; overflow: visible; }
+.q-bar i { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text-2); border-radius: 2px; }
+.q-checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+.q-check { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--panel-2); border: 1px solid var(--border); }
+.q-check.bad { border-color: color-mix(in srgb, var(--danger) 50%, transparent); }
+.q-check.warn { border-color: color-mix(in srgb, var(--warn) 50%, transparent); }
+.q-check .q-ico { margin-top: 1px; }
+
 /* ------------------------------------------------------------------ overlays */
 .drawer-backdrop, .modal-backdrop { position: fixed; inset: 0; background: rgba(3, 8, 18, .55); backdrop-filter: blur(3px); opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 50; }
 .drawer-backdrop.show, .modal-backdrop.show { opacity: 1; pointer-events: auto; }

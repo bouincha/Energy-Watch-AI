@@ -70,14 +70,19 @@ worth **≈ 24,000 MAD** of avoidable cost, which the system has to find, explai
   JSON logs, agent spans, metrics, incidents and audit entries.
 - 🚨 **Incident management**: a circuit breaker, a degraded mode, 4 runbooks, and incidents that
   open and resolve automatically, with an MTTR for each.
-- 🖥️ **A real dashboard** with six pages: Overview, AI Assistant, Anomalies, Actions, Monitoring
-  and Governance.
+- 🖥️ **A real dashboard** with seven pages: Overview, AI Assistant, Anomalies, Actions, Monitoring,
+  Quality and Governance.
+- ✅ **Quality page**: shows in one place whether everything is valid. It displays the latest
+  GitHub Actions run (every job and step), runs the evaluation quality gates live, and runs
+  self-checks on the instance itself.
 
 | AI Assistant | Anomalies |
 |---|---|
 | ![Assistant](docs/screenshots/assistant.png) | ![Anomalies](docs/screenshots/anomalies.png) |
 | **Monitoring & incidents** | **Run trace (correlation ID)** |
 | ![Monitoring](docs/screenshots/monitoring.png) | ![Trace](docs/screenshots/run-trace.png) |
+| **Quality: is everything valid?** | **Governance** |
+| ![Quality](docs/screenshots/quality.png) | ![Governance](docs/screenshots/governance.png) |
 
 ## 🏗 Architecture
 
@@ -119,7 +124,7 @@ Details: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 | Criterion | Implementation | Proof |
 |---|---|---|
 | **Observability**: correlation ID on every run (monitoring agent) | `app/core/observability.py`, `traced()` in `app/agents/nodes.py`, `monitor_node` | `X-Correlation-ID` header, JSON logs, Monitoring page → Run explorer, `tests/test_graph.py::test_every_run_has_a_correlation_id_on_every_span` |
-| **Tests**: suite runs successfully | 65 tests (unit, integration, end-to-end, evaluation gates), 95 % coverage | GitHub Actions → *CI/CD* workflow |
+| **Tests**: suite runs successfully | 70 tests (unit, integration, end-to-end, evaluation gates), 95 % coverage | GitHub Actions → *CI/CD* workflow, and the dashboard's **Quality** page |
 | **Governance**: complete and up-to-date Agent Card | `app/governance/agent_cards.json` (served at `/api/agent-card`) + [docs/AGENT_CARD.md](docs/AGENT_CARD.md) | CI test fails if a card is missing a field or drifts from the graph or version |
 | **Containerization & deployment**: agent accessible via a deployed API | `Dockerfile` (multi-stage, non-root, healthcheck), `render.yaml` | [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md), `scripts/smoke_test.py` |
 | **Incident**: runbook applied, incident handled | `app/core/incidents.py` (RB-001 → RB-004), chaos controller | [docs/RUNBOOK.md](docs/RUNBOOK.md), [docs/INCIDENT_REPORT_INC-0001.md](docs/INCIDENT_REPORT_INC-0001.md) |
@@ -184,6 +189,7 @@ dashboard or at `GET /ready`.
 | `GET/POST` | `/api/incidents`, `/api/incidents/{id}/resolve`, `/api/runbooks` | Incident management |
 | `GET/POST` | `/api/chaos` | Failure injection (game day) |
 | `GET` | `/api/agent-card` | Governance: agent cards + live validation + graph |
+| `GET` | `/api/quality` | Latest CI run, live evaluation gates, runtime self-checks |
 | `GET` | `/health`, `/ready` | Liveness / readiness probes |
 
 Write endpoints (approve, reject, chaos, resolve) require the `X-API-Key` header when
@@ -198,7 +204,7 @@ curl -X POST http://localhost:8000/api/agent/ask \
 ## 🧪 Tests, evaluation & CI/CD
 
 ```bash
-pytest --cov=app                  # 65 tests, ~95 % coverage, ~5 s, no API key needed
+pytest --cov=app                  # 70 tests, ~95 % coverage, ~5 s, no API key needed
 ruff check app tests scripts      # lint
 python -m app.evaluation.run_eval # benchmark
 ```
@@ -241,7 +247,7 @@ app/
 ├── rag/             # knowledge base (Markdown) + BM25 retriever
 ├── static/          # dashboard (HTML/CSS/JS, Chart.js)
 └── main.py          # app entry point + correlation-ID middleware
-tests/               # 65 tests
+tests/               # 70 tests
 scripts/smoke_test.py
 docs/                # architecture, agent card, runbook, incident report, deployment, demo script
 Dockerfile · docker-compose.yml · render.yaml · .github/workflows/ci.yml

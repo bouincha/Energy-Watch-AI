@@ -16,7 +16,7 @@
 | 6 | 3:20-4:30 | **Monitoring** → Game day | Turn on **LLM provider outage** → "Send 3 test questions" → the breaker goes **open**, INC-0001 opens with RB-001, runs are *degraded* but still answered. Turn the outage off, wait ~30 s, ask a question → the breaker **closes** and the incident is **resolved** with an MTTR. Click a run to show the **waterfall trace**. |
 | 7 | 4:30-5:00 | **Actions** page | Approval queue, decision history, append-only audit trail with correlation IDs. |
 | 8 | 5:00-5:30 | **Governance** page | "Agent cards are complete and in sync with the deployed graph; CI fails otherwise." Show the architecture and the runbooks. |
-| 9 | 5:30-6:00 | GitHub → Actions → green CI run | lint → 65 tests → evaluation → Docker build → smoke test → deploy to Render. End on the live URL `/docs`. |
+| 9 | 5:30-6:00 | **Quality** page, then GitHub → Actions | "Is everything valid? One page answers it: the latest CI run with each job and step, 8 evaluation gates re-run live, and 7 self-checks on this instance." Click *Open on GitHub* to show the same green run. End on the live URL `/docs`. |
 
 **Closing line:** "Every request is traceable with one correlation ID, every action has a human
 decision behind it, and every incident follows a runbook."

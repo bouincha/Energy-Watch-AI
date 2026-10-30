@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "system": {
     "name": "EnergyWatch AI",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "release_stage": "alpha (production pilot)",
     "last_updated": "2026-10-30",
     "sector": "Energy",
@@ -38,7 +38,7 @@
     {
       "id": "guardrails",
       "name": "Guardrails Agent",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Security gate",
       "description": "Validates every question before it reaches an LLM: prompt-injection patterns, length limit, control characters, and topic scope (energy only).",
       "uses_llm": false,
@@ -57,7 +57,7 @@
     {
       "id": "supervisor",
       "name": "Supervisor / Planner Agent",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Routing and planning",
       "description": "Classifies the intent (consumption, anomaly, advice, report), detects the site and time window, and plans which specialist agents run, using structured output validated by a Pydantic schema.",
       "uses_llm": true,
@@ -76,7 +76,7 @@
     {
       "id": "consumption_analyst",
       "name": "Consumption Analyst Agent",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Data analysis with tool calling",
       "description": "Chooses and calls read-only data tools (tool calling) to compute consumption, cost, CO2, peak demand, period comparisons, top consumers and data-center PUE, then summarizes the results.",
       "uses_llm": true,
@@ -95,7 +95,7 @@
     {
       "id": "anomaly_detector",
       "name": "Anomaly Detector Agent",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Anomaly detection and explanation",
       "description": "Runs statistical detection (robust z-score against a per-hour, per-day-type baseline learned on 14 days), classifies the pattern (night/weekend operation, sustained increase, drift, spike), quantifies excess kWh and cost, and explains likely root causes.",
       "uses_llm": true,
@@ -114,7 +114,7 @@
     {
       "id": "energy_advisor",
       "name": "Energy Advisor Agent (RAG)",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Grounded recommendations and action proposals",
       "description": "Retrieves relevant sections of the energy-efficiency knowledge base (BM25 with query expansion), writes recommendations with citations and estimated savings, and proposes actions to the human-in-the-loop queue.",
       "uses_llm": true,
@@ -133,7 +133,7 @@
     {
       "id": "report_writer",
       "name": "Report Writer Agent",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Final answer synthesis",
       "description": "Combines the specialists' outputs into one Markdown answer with a headline, keeps every number and citation, flags degraded mode, and passes the output through the output guardrail.",
       "uses_llm": true,
@@ -152,7 +152,7 @@
     {
       "id": "monitor",
       "name": "Monitoring Agent",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "role": "Observability, SLOs and incident detection",
       "description": "Wraps every agent to record spans linked to the correlation ID, evaluates each run against the SLOs, updates metrics, and opens / resolves incidents following the runbook (RB-001 LLM outage, RB-002 latency, RB-003 injection burst, RB-004 tool failure).",
       "uses_llm": false,

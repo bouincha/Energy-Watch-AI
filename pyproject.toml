@@ -1,6 +1,6 @@
 [project]
 name = "energywatch-ai"
-version = "1.0.0"
+version = "1.1.0"
 description = "Multi-agent energy monitoring platform built with LangGraph"
 requires-python = ">=3.11"
 

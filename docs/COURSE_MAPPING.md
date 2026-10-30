@@ -19,6 +19,6 @@
 | | Business agents, human-in-the-loop & audit | `app/core/actions.py`: risk-based approval policy, Approve/Reject in the UI, append-only audit trail |
 | | Multimodal agents | Not in scope for v1.0; see the roadmap in CHANGELOG (meter photo / nameplate reading) |
 | **S5** | Agent observability | Correlation IDs, JSON logs, spans, Prometheus `/metrics`, Monitoring page |
-| | Automated tests & agentic CI/CD | 65 pytest tests, `.github/workflows/ci.yml`, smoke tests before and after deploy |
+| | Automated tests & agentic CI/CD | 70 pytest tests, `.github/workflows/ci.yml`, smoke tests before and after deploy |
 | | Governance, agent cards & versioning | `app/governance/agent_cards.json` validated in CI, `docs/AGENT_CARD.md`, `CHANGELOG.md` |
 | | Deployment: containerization & cloud | `Dockerfile`, `docker-compose.yml`, `render.yaml`, `docs/DEPLOYMENT.md` |

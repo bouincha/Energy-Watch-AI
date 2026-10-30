@@ -3,6 +3,15 @@
 All notable changes to EnergyWatch AI. Versions follow [Semantic Versioning](https://semver.org).
 System version, agent-card versions and prompt version are bumped together.
 
+## [1.1.0] - 2026-10-30
+
+### Added
+- **Quality** dashboard page and `GET /api/quality`: latest GitHub Actions run (jobs and steps),
+  evaluation quality gates run live on the server, and runtime self-checks (graph, agent cards,
+  data, RAG, guardrails canary, LLM breaker, open incidents, deployed commit vs. CI commit).
+- Settings `GITHUB_REPO`, `GITHUB_TOKEN`; `RENDER_GIT_COMMIT` is read automatically on Render.
+- 5 tests for the quality report (70 in total).
+
 ## [1.0.0] - 2026-10-30 · alpha (production pilot)
 
 ### Added
@@ -24,6 +33,6 @@ System version, agent-card versions and prompt version are bumped together.
 - `2026.10.1`: initial prompts for supervisor, analyst, anomaly writer, advisor, report writer.
 
 ## Roadmap
-- 1.1: persistent telemetry (PostgreSQL / OpenTelemetry), larger multilingual evaluation set.
-- 1.2: multimodal agent that reads meter photos and equipment nameplates (vision + text).
-- 1.3: real metering connector (MQTT / utility API) and consumption forecasting.
+- 1.2: persistent telemetry (PostgreSQL / OpenTelemetry), larger multilingual evaluation set.
+- 1.3: multimodal agent that reads meter photos and equipment nameplates (vision + text).
+- 1.4: real metering connector (MQTT / utility API) and consumption forecasting.

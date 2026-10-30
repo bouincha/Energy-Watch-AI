@@ -8,6 +8,7 @@ from fastapi.responses import PlainTextResponse
 
 from app import __version__
 from app.agents.graph import NODES, graph_mermaid, run_agent
+from app.api.quality import quality_report
 from app.api.schemas import AskRequest, AskResponse, ChaosRequest, DecisionRequest, ResolveRequest
 from app.config import get_settings
 from app.core.actions import actions
@@ -244,6 +245,15 @@ def set_chaos(body: ChaosRequest) -> dict:
     state = chaos.update(**body.model_dump())
     actions.record("operator", "chaos.updated", "chaos", str(state.to_dict()))
     return state.to_dict()
+
+
+# ------------------------------------------------------------------------------ quality
+
+
+@router.get("/api/quality", tags=["quality"])
+async def quality(refresh: bool = False) -> dict:
+    """CI status (GitHub Actions), live evaluation gates and runtime self-checks."""
+    return await run_in_threadpool(quality_report, refresh)
 
 
 # ------------------------------------------------------------------------------ governance

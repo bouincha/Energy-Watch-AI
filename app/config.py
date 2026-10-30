@@ -53,6 +53,11 @@ class Settings(BaseSettings):
     max_query_chars: int = 1000
     rate_limit_per_minute: int = 30
 
+    # --- Quality page -----------------------------------------------------------
+    github_repo: str = "bouincha/Energy-Watch-AI"  # CI status shown on the Quality page ("" disables)
+    github_token: str | None = None  # optional, raises the GitHub API rate limit
+    render_git_commit: str | None = None  # set automatically by Render
+
     # --- Data -------------------------------------------------------------------
     data_days: int = 30
     data_seed: int = 42
